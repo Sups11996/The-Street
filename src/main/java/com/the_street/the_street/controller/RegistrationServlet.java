@@ -34,15 +34,15 @@ public class RegistrationServlet extends HttpServlet {
 
         try {
 
-            String fullName = request.getParameter("full_name");
+            String fullName = request.getParameter("fullName");
             String email = request.getParameter("email");
             String phone = request.getParameter("phone");
             String password = request.getParameter("password");
-            String confirmPassword = request.getParameter("confirm_password");
+            String confirmPassword = request.getParameter("confirmPassword");
             String role = request.getParameter("role");
             String address = request.getParameter("address");
 
-            Part filePart = request.getPart("profile_image");
+            Part filePart = request.getPart("profileImage");
             String savedFilePath = "";
 
             if (filePart != null && filePart.getSize() > 0) {
@@ -54,28 +54,41 @@ public class RegistrationServlet extends HttpServlet {
                         && !contentType.equals("image/jpg")) {
 
                     request.setAttribute("errorMessage", "Only JPG, JPEG, and PNG files are allowed.");
-                    request.getRequestDispatcher("register.jsp").forward(request, response);
+                    request.getRequestDispatcher("/auth/register.jsp").forward(request, response);
                     return;
                 }
 
                 if (filePart.getSize() > 1024 * 1024 * 5) {
                     request.setAttribute("errorMessage", "File size must be less than 5MB.");
-                    request.getRequestDispatcher("register.jsp").forward(request, response);
+                    request.getRequestDispatcher("/auth/register.jsp").forward(request, response);
                     return;
                 }
 
-                String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
+                // Get the webapp root path (where JSP files are)
+                String webappPath = getServletContext().getRealPath("/");
+                String uploadPath = webappPath + "uploads";
 
                 File uploadDir = new File(uploadPath);
                 if (!uploadDir.exists()) {
-                    uploadDir.mkdir();
+                    boolean created = uploadDir.mkdirs();
+                    LOGGER.log(Level.INFO, "Upload directory created: " + created + " at " + uploadPath);
                 }
 
                 String uniqueFileName = System.currentTimeMillis() + "_" + fileName;
-                filePart.write(uploadPath + File.separator + uniqueFileName);
+                String fullFilePath = uploadPath + File.separator + uniqueFileName;
 
-                savedFilePath = "uploads/" + uniqueFileName;
+                try {
+                    filePart.write(fullFilePath);
+                    savedFilePath = "uploads/" + uniqueFileName;
+                    LOGGER.log(Level.INFO, "File uploaded successfully to: " + fullFilePath);
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, "Failed to save uploaded file", e);
+                    request.setAttribute("errorMessage", "Failed to save uploaded file.");
+                    request.getRequestDispatcher("/auth/register.jsp").forward(request, response);
+                    return;
+                }
             }
+
 
             if (fullName == null || fullName.trim().isEmpty()
                     || email == null || email.trim().isEmpty()
@@ -85,7 +98,7 @@ public class RegistrationServlet extends HttpServlet {
                     || role == null || role.trim().isEmpty()) {
 
                 request.setAttribute("errorMessage", "All required fields must be filled.");
-                request.getRequestDispatcher("register.jsp").forward(request, response);
+                request.getRequestDispatcher("/auth/register.jsp").forward(request, response);
                 return;
             }
 
@@ -93,43 +106,43 @@ public class RegistrationServlet extends HttpServlet {
 
             if ("ADMIN".equals(role)) {
                 request.setAttribute("errorMessage", "Admin registration is not allowed.");
-                request.getRequestDispatcher("register.jsp").forward(request, response);
+                request.getRequestDispatcher("/auth/register.jsp").forward(request, response);
                 return;
             }
 
             if (!role.equals("DONOR") && !role.equals("RECEIVER") && !role.equals("VOLUNTEER")) {
                 request.setAttribute("errorMessage", "Invalid role selected.");
-                request.getRequestDispatcher("register.jsp").forward(request, response);
+                request.getRequestDispatcher("/auth/register.jsp").forward(request, response);
                 return;
             }
 
             if (!fullName.matches("^[A-Za-z ]+$")) {
                 request.setAttribute("errorMessage", "Full name must contain only letters.");
-                request.getRequestDispatcher("register.jsp").forward(request, response);
+                request.getRequestDispatcher("/auth/register.jsp").forward(request, response);
                 return;
             }
 
             if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
                 request.setAttribute("errorMessage", "Please enter a valid email address.");
-                request.getRequestDispatcher("register.jsp").forward(request, response);
+                request.getRequestDispatcher("/auth/register.jsp").forward(request, response);
                 return;
             }
 
             if (!phone.matches("^[0-9]{10}$")) {
                 request.setAttribute("errorMessage", "Phone number must be 10 digits.");
-                request.getRequestDispatcher("register.jsp").forward(request, response);
+                request.getRequestDispatcher("/auth/register.jsp").forward(request, response);
                 return;
             }
 
             if (password.length() < 6) {
                 request.setAttribute("errorMessage", "Password must be at least 6 characters.");
-                request.getRequestDispatcher("register.jsp").forward(request, response);
+                request.getRequestDispatcher("/auth/register.jsp").forward(request, response);
                 return;
             }
 
             if (!password.equals(confirmPassword)) {
                 request.setAttribute("errorMessage", "Passwords do not match.");
-                request.getRequestDispatcher("register.jsp").forward(request, response);
+                request.getRequestDispatcher("/auth/register.jsp").forward(request, response);
                 return;
             }
 
@@ -137,7 +150,7 @@ public class RegistrationServlet extends HttpServlet {
 
             if (existingUser != null) {
                 request.setAttribute("errorMessage", "Email already exists. Please use another email.");
-                request.getRequestDispatcher("register.jsp").forward(request, response);
+                request.getRequestDispatcher("/auth/register.jsp").forward(request, response);
                 return;
             }
 
@@ -145,7 +158,7 @@ public class RegistrationServlet extends HttpServlet {
 
             if (existingPhone != null) {
                 request.setAttribute("errorMessage", "Phone number already exists. Please use another phone number.");
-                request.getRequestDispatcher("register.jsp").forward(request, response);
+                request.getRequestDispatcher("/auth/register.jsp").forward(request, response);
                 return;
             }
 
@@ -172,17 +185,17 @@ public class RegistrationServlet extends HttpServlet {
 
             if (result) {
                 request.setAttribute("successMessage", "Registration successful. Please login.");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
+                request.getRequestDispatcher("/auth/login.jsp").forward(request, response);
             } else {
                 request.setAttribute("errorMessage", "Registration failed. Please try again.");
-                request.getRequestDispatcher("register.jsp").forward(request, response);
+                request.getRequestDispatcher("/auth/register.jsp").forward(request, response);
             }
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error occurred during user registration.", e);
 
             request.setAttribute("errorMessage", "Something went wrong during registration. Please try again.");
-            request.getRequestDispatcher("register.jsp").forward(request, response);
+            request.getRequestDispatcher("/auth/register.jsp").forward(request, response);
         }
     }
 }
