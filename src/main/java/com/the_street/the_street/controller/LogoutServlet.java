@@ -28,13 +28,13 @@ public class LogoutServlet extends HttpServlet {
             rememberCookie.setPath("/");
             response.addCookie(rememberCookie);
 
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("auth/login.jsp");
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error occurred during logout process.", e);
 
             // Even if error happens, still try to redirect user safely
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("auth/login.jsp");
         }
     }
 }

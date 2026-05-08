@@ -17,6 +17,10 @@ public interface UserInterface {
     boolean updateUser(User user);
     boolean deleteUser(int userId);
 
+    // Duplicate validation for updates
+    boolean isEmailExistsForOtherUser(String email, int userId);
+    boolean isPhoneExistsForOtherUser(String phone, int userId);
+
     // Admin status actions
     boolean updateUserStatus(int userId, String status);
     boolean approveUser(int userId);

@@ -31,7 +31,7 @@ public class LoginServlet extends HttpServlet {
                     || password == null || password.trim().isEmpty()) {
 
                 request.setAttribute("errorMessage", "Email and password are required.");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
+                request.getRequestDispatcher("/auth/login.jsp").forward(request, response);
                 return;
             }
 
@@ -39,24 +39,41 @@ public class LoginServlet extends HttpServlet {
 
             if (user == null) {
                 request.setAttribute("errorMessage", "Invalid email or password.");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
+                request.getRequestDispatcher("/auth/login.jsp").forward(request, response);
                 return;
             }
 
+            // Check password
             boolean isValidPassword = PasswordUtils.checkPassword(password, user.getPassword());
 
             if (!isValidPassword) {
                 request.setAttribute("errorMessage", "Invalid email or password.");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
+                request.getRequestDispatcher("/auth/login.jsp").forward(request, response);
                 return;
             }
 
-            if (!"ACTIVE".equals(user.getStatus())) {
-                request.setAttribute("errorMessage", "Your account is " + user.getStatus() + ".");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
+            // Check account status after password validation
+            String status = user.getStatus();
+            if (!"ACTIVE".equalsIgnoreCase(status)) {
+                String errorMessage;
+                if ("BLOCKED".equalsIgnoreCase(status)) {
+                    errorMessage = "Your account has been blocked. Please contact admin.";
+                } else if ("PENDING".equalsIgnoreCase(status)) {
+                    errorMessage = "Your account is pending admin approval.";
+                } else if ("REJECTED".equalsIgnoreCase(status)) {
+                    errorMessage = "Your account registration has been rejected.";
+                } else {
+                    errorMessage = "Your account status is " + status + ". Please contact admin.";
+                }
+
+                LOGGER.log(Level.WARNING, "Login attempt with non-ACTIVE status. Email: {0}, Status: {1}",
+                        new Object[]{email, status});
+                request.setAttribute("errorMessage", errorMessage);
+                request.getRequestDispatcher("/auth/login.jsp").forward(request, response);
                 return;
             }
 
+            // Create session only for ACTIVE users
             HttpSession session = request.getSession();
             session.setAttribute("loggedInUser", user);
             session.setAttribute("userId", user.getUserId());
@@ -65,33 +82,34 @@ public class LoginServlet extends HttpServlet {
 
             session.setMaxInactiveInterval(30 * 60);
 
-            String remember = request.getParameter("remember");
+            // Set remember-me cookie only if login is successful
+            String remember = request.getParameter("rememberMe");
 
             if (remember != null) {
                 Cookie cookie = new Cookie("rememberEmail", user.getEmail());
                 cookie.setMaxAge(7 * 24 * 60 * 60);
-                cookie.setPath("/");
+                cookie.setPath(request.getContextPath());
                 response.addCookie(cookie);
             }
 
-            if ("ADMIN".equals(user.getRole())) {
-                response.sendRedirect("admin-dashboard.jsp");
-            } else if ("DONOR".equals(user.getRole())) {
-                response.sendRedirect("donor-dashboard.jsp");
-            } else if ("RECEIVER".equals(user.getRole())) {
-                response.sendRedirect("receiver-dashboard.jsp");
-            } else if ("VOLUNTEER".equals(user.getRole())) {
-                response.sendRedirect("volunteer-dashboard.jsp");
+            if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+                response.sendRedirect(request.getContextPath() + "/admin/dashboard.jsp");
+            } else if ("DONOR".equalsIgnoreCase(user.getRole())) {
+                response.sendRedirect(request.getContextPath() + "/donor/dashboard.jsp");
+            } else if ("RECEIVER".equalsIgnoreCase(user.getRole())) {
+                response.sendRedirect(request.getContextPath() + "/receiver/dashboard.jsp");
+            } else if ("VOLUNTEER".equalsIgnoreCase(user.getRole())) {
+                response.sendRedirect(request.getContextPath() + "/volunteer/dashboard.jsp");
             } else {
                 request.setAttribute("errorMessage", "Invalid user role.");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
+                request.getRequestDispatcher("/auth/login.jsp").forward(request, response);
             }
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Login error", e);
 
             request.setAttribute("errorMessage", "Something went wrong. Please try again.");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("/auth/login.jsp").forward(request, response);
         }
     }
 }

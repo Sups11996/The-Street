@@ -8,6 +8,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -23,44 +24,75 @@ public class UpdateUserServlet extends HttpServlet {
     protected void service(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Admin security check
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("role") == null ||
+                !"ADMIN".equals(session.getAttribute("role"))) {
+            request.setAttribute("message", "Access denied. Admin privileges required.");
+            request.setAttribute("messageType", "error");
+            request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
+            return;
+        }
+
         try {
-            String userIdParam = request.getParameter("user_id");
+            // Get user ID
+            String userIdParam = request.getParameter("userId");
 
             if (userIdParam == null || userIdParam.trim().isEmpty()) {
-                request.getSession().setAttribute("errorMessage", "Invalid user ID.");
-                response.sendRedirect("view-users");
+                LOGGER.log(Level.WARNING, "Update user attempt with missing user ID.");
+                request.setAttribute("message", "Invalid user ID.");
+                request.setAttribute("messageType", "error");
+                request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
                 return;
             }
 
             int userId = Integer.parseInt(userIdParam);
 
+            // Get existing user
             User existingUser = userInterface.getUserById(userId);
 
             if (existingUser == null) {
-                request.getSession().setAttribute("errorMessage", "User not found.");
-                response.sendRedirect("view-users");
+                LOGGER.log(Level.WARNING, "Update user attempt for non-existent user. User ID: {0}", userId);
+                request.setAttribute("message", "User not found.");
+                request.setAttribute("messageType", "error");
+                request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
                 return;
             }
 
-            String fullName = request.getParameter("full_name");
+            // Get form parameters
+            String fullName = request.getParameter("fullName");
             String email = request.getParameter("email");
             String phone = request.getParameter("phone");
             String role = request.getParameter("role");
             String address = request.getParameter("address");
             String status = request.getParameter("status");
 
+            // Validate required fields - prevent empty values
             if (fullName == null || fullName.trim().isEmpty()) {
-                fullName = existingUser.getFullName();
+                LOGGER.log(Level.WARNING, "Update user attempt with empty full name. User ID: {0}", userId);
+                request.setAttribute("message", "Full name cannot be empty.");
+                request.setAttribute("messageType", "error");
+                request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
+                return;
             }
 
             if (email == null || email.trim().isEmpty()) {
-                email = existingUser.getEmail();
+                LOGGER.log(Level.WARNING, "Update user attempt with empty email. User ID: {0}", userId);
+                request.setAttribute("message", "Email cannot be empty.");
+                request.setAttribute("messageType", "error");
+                request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
+                return;
             }
 
             if (phone == null || phone.trim().isEmpty()) {
-                phone = existingUser.getPhone();
+                LOGGER.log(Level.WARNING, "Update user attempt with empty phone. User ID: {0}", userId);
+                request.setAttribute("message", "Phone number cannot be empty.");
+                request.setAttribute("messageType", "error");
+                request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
+                return;
             }
 
+            // Use existing values for optional fields if empty
             if (role == null || role.trim().isEmpty()) {
                 role = existingUser.getRole();
             }
@@ -73,34 +105,70 @@ public class UpdateUserServlet extends HttpServlet {
                 status = existingUser.getStatus();
             }
 
+            // Trim values
+            fullName = fullName.trim();
+            email = email.trim();
+            phone = phone.trim();
+            role = role.trim();
+            address = address.trim();
+            status = status.trim();
+
+            // Check if email already exists for another user
+            if (userInterface.isEmailExistsForOtherUser(email, userId)) {
+                LOGGER.log(Level.WARNING, "Update user attempt with duplicate email. User ID: {0}, Email: {1}",
+                        new Object[]{userId, email});
+                request.setAttribute("message", "Update failed: Email already exists.");
+                request.setAttribute("messageType", "error");
+                request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
+                return;
+            }
+
+            // Check if phone already exists for another user
+            if (userInterface.isPhoneExistsForOtherUser(phone, userId)) {
+                LOGGER.log(Level.WARNING, "Update user attempt with duplicate phone. User ID: {0}, Phone: {1}",
+                        new Object[]{userId, phone});
+                request.setAttribute("message", "Update failed: Phone number already exists.");
+                request.setAttribute("messageType", "error");
+                request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
+                return;
+            }
+
+            // Create updated user object
             User user = new User();
             user.setUserId(userId);
-            user.setFullName(fullName.trim());
-            user.setEmail(email.trim());
-            user.setPhone(phone.trim());
-            user.setRole(role.trim());
-            user.setAddress(address.trim());
-            user.setStatus(status.trim());
+            user.setFullName(fullName);
+            user.setEmail(email);
+            user.setPhone(phone);
+            user.setRole(role);
+            user.setAddress(address);
+            user.setStatus(status);
 
+            // Attempt to update user
             boolean result = userInterface.updateUser(user);
 
             if (result) {
-                request.getSession().setAttribute("successMessage", "User updated successfully.");
+                LOGGER.log(Level.INFO, "User updated successfully. User ID: {0}", userId);
+                request.setAttribute("message", "User updated successfully.");
+                request.setAttribute("messageType", "success");
             } else {
-                request.getSession().setAttribute("errorMessage", "Failed to update user.");
+                LOGGER.log(Level.WARNING, "User update failed. User ID: {0}", userId);
+                request.setAttribute("message", "Update failed. No changes were made.");
+                request.setAttribute("messageType", "error");
             }
 
-            response.sendRedirect("view-users");
+            request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
             LOGGER.log(Level.SEVERE, "Invalid user ID format while updating user.", e);
-            request.getSession().setAttribute("errorMessage", "Invalid user ID format.");
-            response.sendRedirect("view-users");
+            request.setAttribute("message", "Invalid user ID format.");
+            request.setAttribute("messageType", "error");
+            request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error occurred while updating user.", e);
-            request.getSession().setAttribute("errorMessage", "Something went wrong while updating user.");
-            response.sendRedirect("view-users");
+            request.setAttribute("message", "Something went wrong while updating user.");
+            request.setAttribute("messageType", "error");
+            request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
         }
     }
 }

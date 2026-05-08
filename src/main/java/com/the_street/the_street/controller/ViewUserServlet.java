@@ -29,13 +29,13 @@ public class ViewUserServlet extends HttpServlet {
             ArrayList<User> users = userInterface.getAllUsers();
 
             request.setAttribute("users", users);
-            request.getRequestDispatcher("admin/view-users.jsp").forward(request, response);
+            request.getRequestDispatcher("/admin/view-users.jsp").forward(request, response);
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error occurred while retrieving user list.", e);
 
             request.getSession().setAttribute("errorMessage", "Unable to load users at the moment.");
-            response.sendRedirect("admin/dashboard.jsp"); // safe fallback
+            response.sendRedirect(request.getContextPath() + "/admin/dashboard.jsp"); // safe fallback
         }
     }
 }

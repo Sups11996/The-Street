@@ -140,13 +140,51 @@ public class UserDAO implements UserInterface {
             ps.setString(6, user.getStatus());
             ps.setInt(7, user.getUserId());
 
-            return ps.executeUpdate() > 0;
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error updating user.", e);
+            return false;
         }
+    }
 
-        return false;
+    @Override
+    public boolean isEmailExistsForOtherUser(String email, int userId) {
+        String sql = "SELECT user_id FROM users WHERE email = ? AND user_id != ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, email);
+            ps.setInt(2, userId);
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next(); // Returns true if email exists for another user
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error checking email existence for other user.", e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isPhoneExistsForOtherUser(String phone, int userId) {
+        String sql = "SELECT user_id FROM users WHERE phone = ? AND user_id != ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, phone);
+            ps.setInt(2, userId);
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next(); // Returns true if phone exists for another user
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error checking phone existence for other user.", e);
+            return false;
+        }
     }
 
     @Override
