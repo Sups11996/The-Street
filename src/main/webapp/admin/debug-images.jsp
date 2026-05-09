@@ -6,9 +6,9 @@
 <head>
   <title>Debug - Profile Images</title>
   <style>
-    body { font-family: Arial; padding: 20px; background: #f4f7f6; }
+    body { font-family: 'Segoe UI', Arial; padding: 20px; background: #F5F7F6; }
     .debug-box { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; }
-    .debug-box h3 { color: #1f4d3a; margin-top: 0; }
+    .debug-box h3 { color: #1F7A5C; margin-top: 0; }
     .debug-info { background: #f0f0f0; padding: 10px; border-radius: 4px; margin: 5px 0; }
     .test-img { width: 100px; height: 100px; border: 2px solid #ccc; margin: 10px 0; }
   </style>

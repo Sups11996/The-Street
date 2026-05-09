@@ -34,7 +34,7 @@ public class RoleFilter implements Filter {
             HttpSession session = req.getSession(false);
 
             if (session == null || session.getAttribute("role") == null) {
-                res.sendRedirect(req.getContextPath() + "/login.jsp");
+                res.sendRedirect(req.getContextPath() + "/auth/login.jsp");
                 return;
             }
 
@@ -51,7 +51,7 @@ public class RoleFilter implements Filter {
             LOGGER.log(Level.SEVERE, "Error occurred in role-based authorization filter.", e);
 
             // Safe fallback
-            res.sendRedirect(req.getContextPath() + "/login.jsp");
+            res.sendRedirect(req.getContextPath() + "/auth/login.jsp");
         }
     }
 }

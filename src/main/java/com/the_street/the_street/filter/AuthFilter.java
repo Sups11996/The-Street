@@ -37,7 +37,7 @@ public class AuthFilter implements Filter {
             HttpSession session = req.getSession(false);
 
             if (session == null || session.getAttribute("loggedInUser") == null) {
-                res.sendRedirect(req.getContextPath() + "/login.jsp");
+                res.sendRedirect(req.getContextPath() + "/auth/login.jsp");
                 return;
             }
 
@@ -52,7 +52,7 @@ public class AuthFilter implements Filter {
             LOGGER.log(Level.SEVERE, "Error occurred in authentication filter.", e);
 
             // Safe fallback redirect
-            res.sendRedirect(req.getContextPath() + "/login.jsp");
+            res.sendRedirect(req.getContextPath() + "/auth/login.jsp");
         }
     }
 }
