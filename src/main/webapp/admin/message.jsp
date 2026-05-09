@@ -80,8 +80,8 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f7f6;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #F5F7F6;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -121,34 +121,34 @@
 
         /* Success variant - GREEN */
         .msg-success .msg-icon {
-            background: #e8f5e9;
-            color: #2e7d32;
+            background: #D1FAE5;
+            color: #065F46;
         }
 
         .msg-success .msg-text {
-            color: #2e7d32;
+            color: #065F46;
         }
 
         /* Warning variant - ORANGE */
         .msg-warning .msg-icon {
-            background: #fff3e0;
-            color: #e67e22;
+            background: #FEF3C7;
+            color: #92400E;
         }
 
         .msg-warning .msg-text {
-            color: #e67e22;
+            color: #92400E;
         }
 
         /* Danger/Error variant - RED */
         .msg-danger .msg-icon,
         .msg-error .msg-icon {
-            background: #ffebee;
-            color: #c62828;
+            background: #FEE2E2;
+            color: #991B1B;
         }
 
         .msg-danger .msg-text,
         .msg-error .msg-text {
-            color: #c62828;
+            color: #991B1B;
         }
 
         /* Message text */
@@ -161,19 +161,19 @@
 
         /* User details card */
         .user-details {
-            background: #f9f9f9;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
+            background: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            border-radius: 10px;
             padding: 20px;
             margin: 20px 0;
             text-align: left;
         }
 
         .user-details h3 {
-            color: #1f4d3a;
+            color: #1F7A5C;
             margin-bottom: 15px;
             font-size: 18px;
-            border-bottom: 2px solid #1f4d3a;
+            border-bottom: 2px solid #D1FAE5;
             padding-bottom: 8px;
         }
 
@@ -184,17 +184,17 @@
 
         .user-details td {
             padding: 8px 0;
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid #F3F4F6;
         }
 
         .user-details td:first-child {
             font-weight: bold;
-            color: #555;
+            color: #6B7280;
             width: 40%;
         }
 
         .user-details td:last-child {
-            color: #333;
+            color: #1E1E1E;
         }
 
         .user-details tr:last-child td {
@@ -216,30 +216,11 @@
             text-transform: uppercase;
         }
 
-        .status-active {
-            background: #2e7d32;
-            color: white;
-        }
-
-        .status-pending {
-            background: #e67e22;
-            color: white;
-        }
-
-        .status-blocked {
-            background: #8b0000;
-            color: white;
-        }
-
-        .status-rejected {
-            background: #c62828;
-            color: white;
-        }
-
-        .status-deleted {
-            background: #555;
-            color: white;
-        }
+        .status-active   { background: #D1FAE5; color: #065F46; }
+        .status-pending  { background: #FEF3C7; color: #92400E; }
+        .status-blocked  { background: #FEE2E2; color: #991B1B; }
+        .status-rejected { background: #F3F4F6; color: #374151; }
+        .status-deleted  { background: #F3F4F6; color: #374151; }
 
         /* Button row */
         .msg-actions {
@@ -249,10 +230,9 @@
             flex-wrap: wrap;
         }
 
-        /* Green button — Back to Dashboard */
         .btn-primary {
             display: inline-block;
-            background: #2e7d32;
+            background: #1F7A5C;
             color: #ffffff;
             padding: 10px 18px;
             border-radius: 8px;
@@ -265,13 +245,13 @@
         }
 
         .btn-primary:hover {
-            background: #1b5e20;
+            background: #145A42;
         }
 
         /* Dark button — View Users */
         .btn-dark {
             display: inline-block;
-            background: #333333;
+            background: #374151;
             color: #ffffff;
             padding: 10px 18px;
             border-radius: 8px;
@@ -284,7 +264,7 @@
         }
 
         .btn-dark:hover {
-            background: #111111;
+            background: #1F2937;
         }
 
         /* Responsive */

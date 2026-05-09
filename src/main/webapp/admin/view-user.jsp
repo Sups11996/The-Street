@@ -60,9 +60,9 @@
         <% if (hasImage) { %>
         <img src="<%= request.getContextPath() %>/<%= profileImage %>"
              alt="Profile"
-             style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #1f4d3a;">
+             style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #1F7A5C;">
         <% } else { %>
-        <div style="width: 100px; height: 100px; border-radius: 50%; background: #1f4d3a; color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 36px;">
+        <div style="width: 100px; height: 100px; border-radius: 50%; background: #1F7A5C; color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 36px;">
           <%= u.getFullName().substring(0, 1).toUpperCase() %>
         </div>
         <% } %>
