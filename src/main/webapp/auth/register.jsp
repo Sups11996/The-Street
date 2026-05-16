@@ -462,7 +462,7 @@
 
             </div>
 
-            <button type="submit" class="btn-submit">Create Account</button>
+            <button type="submit" class="btn-submit" id="registerBtn">Create Account</button>
         </form>
 
         <hr class="form-divider">
@@ -500,6 +500,31 @@
             display.textContent = '';
         }
     }
+
+    document.querySelector('form').addEventListener('submit', function() {
+        const btn = document.getElementById('registerBtn');
+        btn.textContent = 'Creating account...';
+        btn.disabled = true;
+        btn.style.opacity = '0.75';
+        btn.style.cursor = 'not-allowed';
+    });
+
+    // Auto-redirect to login after successful registration
+    <% if (request.getAttribute("successMessage") != null) { %>
+    const successMsg = document.querySelector('.message.success');
+    if (successMsg) {
+        let secs = 2;
+        const interval = setInterval(() => {
+            secs--;
+            successMsg.textContent = 'Registration successful! Redirecting to login in ' + secs + 's...';
+            if (secs <= 0) {
+                clearInterval(interval);
+                window.location.href = '<%= request.getContextPath() %>/auth/login.jsp';
+            }
+        }, 1000);
+        successMsg.textContent = 'Registration successful! Redirecting to login in 2s...';
+    }
+    <% } %>
 </script>
 
 </body>

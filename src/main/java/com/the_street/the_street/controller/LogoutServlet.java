@@ -5,36 +5,21 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @WebServlet("/logout")
 public class LogoutServlet extends HttpServlet {
 
-    private static final Logger LOGGER = Logger.getLogger(LogoutServlet.class.getName());
-
-    protected void service(HttpServletRequest request, HttpServletResponse response)
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
+        HttpSession session = req.getSession(false);
+        if (session != null) session.invalidate();
 
-        try {
-            HttpSession session = request.getSession(false);
+        Cookie c = new Cookie("rememberEmail", "");
+        c.setMaxAge(0);
+        c.setPath(req.getContextPath().isEmpty() ? "/" : req.getContextPath());
+        res.addCookie(c);
 
-            if (session != null) {
-                session.invalidate();
-            }
-
-            Cookie rememberCookie = new Cookie("rememberEmail", "");
-            rememberCookie.setMaxAge(0);
-            rememberCookie.setPath("/");
-            response.addCookie(rememberCookie);
-
-            response.sendRedirect("auth/login.jsp");
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error occurred during logout process.", e);
-
-            // Even if error happens, still try to redirect user safely
-            response.sendRedirect("auth/login.jsp");
-        }
+        res.sendRedirect(req.getContextPath() + "/auth/login.jsp");
     }
 }

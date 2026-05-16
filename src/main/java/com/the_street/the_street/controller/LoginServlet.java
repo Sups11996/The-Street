@@ -16,100 +16,74 @@ import java.util.logging.Logger;
 public class LoginServlet extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(LoginServlet.class.getName());
-
     private final UserInterface userInterface = new UserDAO();
 
     @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
-
         try {
-            String email = request.getParameter("email");
-            String password = request.getParameter("password");
+            String email    = req.getParameter("email");
+            String password = req.getParameter("password");
 
-            if (email == null || email.trim().isEmpty()
-                    || password == null || password.trim().isEmpty()) {
-
-                request.setAttribute("errorMessage", "Email and password are required.");
-                request.getRequestDispatcher("/auth/login.jsp").forward(request, response);
+            if (email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+                req.setAttribute("errorMessage", "Email and password are required.");
+                req.getRequestDispatcher("/auth/login.jsp").forward(req, res);
                 return;
             }
 
             User user = userInterface.getUserByEmail(email.trim());
-
-            if (user == null) {
-                request.setAttribute("errorMessage", "Invalid email or password.");
-                request.getRequestDispatcher("/auth/login.jsp").forward(request, response);
+            if (user == null || !PasswordUtils.checkPassword(password, user.getPassword())) {
+                req.setAttribute("errorMessage", "Invalid email or password.");
+                req.getRequestDispatcher("/auth/login.jsp").forward(req, res);
                 return;
             }
 
-            // Check password
-            boolean isValidPassword = PasswordUtils.checkPassword(password, user.getPassword());
-
-            if (!isValidPassword) {
-                request.setAttribute("errorMessage", "Invalid email or password.");
-                request.getRequestDispatcher("/auth/login.jsp").forward(request, response);
-                return;
-            }
-
-            // Check account status after password validation
             String status = user.getStatus();
             if (!"ACTIVE".equalsIgnoreCase(status)) {
-                String errorMessage;
-                if ("BLOCKED".equalsIgnoreCase(status)) {
-                    errorMessage = "Your account has been blocked. Please contact admin.";
-                } else if ("PENDING".equalsIgnoreCase(status)) {
-                    errorMessage = "Your account is pending admin approval.";
-                } else if ("REJECTED".equalsIgnoreCase(status)) {
-                    errorMessage = "Your account registration has been rejected.";
-                } else {
-                    errorMessage = "Your account status is " + status + ". Please contact admin.";
-                }
-
-                LOGGER.log(Level.WARNING, "Login attempt with non-ACTIVE status. Email: {0}, Status: {1}",
-                        new Object[]{email, status});
-                request.setAttribute("errorMessage", errorMessage);
-                request.getRequestDispatcher("/auth/login.jsp").forward(request, response);
+                String msg = switch (status.toUpperCase()) {
+                    case "BLOCKED"  -> "Your account has been blocked. Please contact admin.";
+                    case "PENDING"  -> "Your account is pending admin approval.";
+                    case "REJECTED" -> "Your account registration has been rejected.";
+                    default         -> "Your account status is " + status + ". Please contact admin.";
+                };
+                LOGGER.log(Level.WARNING, "Login blocked. Email: {0}, Status: {1}", new Object[]{email, status});
+                req.setAttribute("errorMessage", msg);
+                req.getRequestDispatcher("/auth/login.jsp").forward(req, res);
                 return;
             }
 
-            // Create session only for ACTIVE users
-            HttpSession session = request.getSession();
+            HttpSession session = req.getSession();
             session.setAttribute("loggedInUser", user);
-            session.setAttribute("userId", user.getUserId());
+            session.setAttribute("userId",   user.getUserId());
             session.setAttribute("fullName", user.getFullName());
-            session.setAttribute("role", user.getRole());
-
+            session.setAttribute("role",     user.getRole());
             session.setMaxInactiveInterval(30 * 60);
 
-            // Set remember-me cookie only if login is successful
-            String remember = request.getParameter("rememberMe");
-
-            if (remember != null) {
+            if (req.getParameter("rememberMe") != null) {
                 Cookie cookie = new Cookie("rememberEmail", user.getEmail());
                 cookie.setMaxAge(7 * 24 * 60 * 60);
-                cookie.setPath(request.getContextPath());
-                response.addCookie(cookie);
+                cookie.setPath(req.getContextPath());
+                res.addCookie(cookie);
             }
 
-            if ("ADMIN".equalsIgnoreCase(user.getRole())) {
-                response.sendRedirect(request.getContextPath() + "/admin/dashboard.jsp");
-            } else if ("DONOR".equalsIgnoreCase(user.getRole())) {
-                response.sendRedirect(request.getContextPath() + "/donor/dashboard.jsp");
-            } else if ("RECEIVER".equalsIgnoreCase(user.getRole())) {
-                response.sendRedirect(request.getContextPath() + "/receiver/dashboard.jsp");
-            } else if ("VOLUNTEER".equalsIgnoreCase(user.getRole())) {
-                response.sendRedirect(request.getContextPath() + "/volunteer/dashboard.jsp");
+            String dest = switch (user.getRole().toUpperCase()) {
+                case "ADMIN"     -> "/admin/dashboard.jsp";
+                case "DONOR"     -> "/donor/dashboard.jsp";
+                case "RECEIVER"  -> "/receiver/dashboard.jsp";
+                case "VOLUNTEER" -> "/volunteer/dashboard.jsp";
+                default          -> null;
+            };
+
+            if (dest != null) {
+                res.sendRedirect(req.getContextPath() + dest);
             } else {
-                request.setAttribute("errorMessage", "Invalid user role.");
-                request.getRequestDispatcher("/auth/login.jsp").forward(request, response);
+                req.setAttribute("errorMessage", "Invalid user role.");
+                req.getRequestDispatcher("/auth/login.jsp").forward(req, res);
             }
-
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Login error", e);
-
-            request.setAttribute("errorMessage", "Something went wrong. Please try again.");
-            request.getRequestDispatcher("/auth/login.jsp").forward(request, response);
+            LOGGER.log(Level.SEVERE, "Login error.", e);
+            req.setAttribute("errorMessage", "Something went wrong. Please try again.");
+            req.getRequestDispatcher("/auth/login.jsp").forward(req, res);
         }
     }
 }

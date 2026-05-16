@@ -23,19 +23,7 @@ public class User {
         this.profileImage = profileImage;
     }
 
-    public User() {
-    }
-
-    public User(String fullName, String email, String phone, String password,
-                String role, String address, String status) {
-        this.fullName = fullName;
-        this.email = email;
-        this.phone = phone;
-        this.password = password;
-        this.role = role;
-        this.address = address;
-        this.status = status;
-    }
+    public User() {}
 
     public int getUserId() {
         return userId;

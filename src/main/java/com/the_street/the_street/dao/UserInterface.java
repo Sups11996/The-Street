@@ -30,4 +30,5 @@ public interface UserInterface {
     // Dashboard count cards
     int countUsers();
     int countPendingUsers();
+    int countActiveUsers();
 }

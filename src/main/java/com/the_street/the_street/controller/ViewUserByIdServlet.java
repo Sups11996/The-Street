@@ -3,9 +3,12 @@ package com.the_street.the_street.controller;
 import com.the_street.the_street.dao.UserDAO;
 import com.the_street.the_street.dao.UserInterface;
 import com.the_street.the_street.model.User;
+import com.the_street.the_street.utils.ServletUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -15,50 +18,30 @@ import java.util.logging.Logger;
 public class ViewUserByIdServlet extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(ViewUserByIdServlet.class.getName());
-
     private final UserInterface userInterface = new UserDAO();
 
     @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
-
         try {
-            String userIdParam = request.getParameter("user_id");
-            String mode = request.getParameter("mode");
-
-            if (userIdParam == null || userIdParam.trim().isEmpty()) {
-                request.getSession().setAttribute("errorMessage", "Invalid user ID.");
-                response.sendRedirect(request.getContextPath() + "/view-users");
-                return;
-            }
-
-            int userId = Integer.parseInt(userIdParam);
+            int userId = ServletUtils.parseUserId(req.getParameter("user_id"), req, res);
+            if (userId == -1) return;
 
             User user = userInterface.getUserById(userId);
-
             if (user == null) {
-                request.getSession().setAttribute("errorMessage", "User not found.");
-                response.sendRedirect(request.getContextPath() + "/view-users");
+                req.getSession().setAttribute("errorMessage", "User not found.");
+                res.sendRedirect(req.getContextPath() + "/view-users");
                 return;
             }
 
-            request.setAttribute("user", user);
-
-            if ("edit".equalsIgnoreCase(mode)) {
-                request.getRequestDispatcher("/admin/update-user.jsp").forward(request, response);
-            } else {
-                request.getRequestDispatcher("/admin/view-user.jsp").forward(request, response);
-            }
-
-        } catch (NumberFormatException e) {
-            LOGGER.log(Level.SEVERE, "Invalid user ID format while viewing user by ID.", e);
-            request.getSession().setAttribute("errorMessage", "Invalid user ID format.");
-            response.sendRedirect(request.getContextPath() + "/view-users");
-
+            req.setAttribute("user", user);
+            String mode = req.getParameter("mode");
+            req.getRequestDispatcher("edit".equalsIgnoreCase(mode)
+                ? "/admin/update-user.jsp" : "/admin/view-user.jsp").forward(req, res);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error occurred while loading user details.", e);
-            request.getSession().setAttribute("errorMessage", "Something went wrong while loading user details.");
-            response.sendRedirect(request.getContextPath() + "/view-users");
+            LOGGER.log(Level.SEVERE, "Error loading user details.", e);
+            req.getSession().setAttribute("errorMessage", "Something went wrong.");
+            res.sendRedirect(req.getContextPath() + "/view-users");
         }
     }
 }

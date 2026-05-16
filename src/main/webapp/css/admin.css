@@ -24,6 +24,7 @@ body {
 .dashboard {
     display: flex;
     min-height: 100vh;
+    height: 100%;
 }
 
 /* ── Sidebar ── */
@@ -33,6 +34,8 @@ body {
     color: white;
     padding: 28px 20px;
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar h2 {

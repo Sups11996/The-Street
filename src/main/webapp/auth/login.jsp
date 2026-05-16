@@ -343,7 +343,7 @@
                 <label for="rememberMe">Remember me</label>
             </div>
 
-            <button type="submit" class="btn-submit">Sign In</button>
+            <button type="submit" class="btn-submit" id="loginBtn">Sign In</button>
         </form>
 
         <hr class="form-divider">
@@ -374,6 +374,14 @@
             btn.title = 'Show password';
         }
     }
+
+    document.querySelector('form').addEventListener('submit', function() {
+        const btn = document.getElementById('loginBtn');
+        btn.textContent = 'Signing in...';
+        btn.disabled = true;
+        btn.style.opacity = '0.75';
+        btn.style.cursor = 'not-allowed';
+    });
 </script>
 
 </body>

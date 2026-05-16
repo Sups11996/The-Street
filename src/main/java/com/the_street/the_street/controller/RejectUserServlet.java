@@ -3,12 +3,12 @@ package com.the_street.the_street.controller;
 import com.the_street.the_street.dao.UserDAO;
 import com.the_street.the_street.dao.UserInterface;
 import com.the_street.the_street.model.User;
+import com.the_street.the_street.utils.ServletUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -18,79 +18,32 @@ import java.util.logging.Logger;
 public class RejectUserServlet extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(RejectUserServlet.class.getName());
-
     private final UserInterface userInterface = new UserDAO();
 
-    protected void service(HttpServletRequest request, HttpServletResponse response)
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
-
-        // Admin security check
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("role") == null ||
-                !"ADMIN".equals(session.getAttribute("role"))) {
-            request.setAttribute("message", "Access denied. Admin privileges required.");
-            request.setAttribute("messageType", "error");
-            request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
-            return;
-        }
-
+        if (!ServletUtils.requireAdmin(req, res)) return;
         try {
-            String userIdParam = request.getParameter("userId");
+            int userId = ServletUtils.parseUserId(req.getParameter("userId"), req, res);
+            if (userId == -1) return;
 
-            if (userIdParam == null || userIdParam.trim().isEmpty()) {
-                LOGGER.log(Level.WARNING, "Reject user attempt with missing user ID.");
-                request.setAttribute("message", "Invalid user ID.");
-                request.setAttribute("messageType", "error");
-                request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
-                return;
-            }
-
-            int userId = Integer.parseInt(userIdParam);
-
-            // Fetch user before performing action
             User user = userInterface.getUserById(userId);
+            if (user == null) { ServletUtils.forwardMessage(req, res, "User not found.", "error"); return; }
 
-            if (user == null) {
-                LOGGER.log(Level.WARNING, "Reject user attempt for non-existent user. User ID: {0}", userId);
-                request.setAttribute("message", "User not found.");
-                request.setAttribute("messageType", "error");
-                request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
-                return;
-            }
+            String prev = user.getStatus();
+            boolean ok  = userInterface.rejectUser(userId);
+            LOGGER.log(ok ? Level.INFO : Level.WARNING, "Reject user {0}: {1}", new Object[]{userId, ok});
 
-            // Store previous status
-            String previousStatus = user.getStatus();
-
-            // Perform rejection
-            boolean result = userInterface.rejectUser(userId);
-
-            if (result) {
-                LOGGER.log(Level.INFO, "User rejected successfully. User ID: {0}", userId);
-                request.setAttribute("message", "User rejected successfully.");
-                request.setAttribute("messageType", "error");
-                request.setAttribute("user", user);
-                request.setAttribute("previousStatus", previousStatus);
-                request.setAttribute("newStatus", "REJECTED");
-            } else {
-                LOGGER.log(Level.WARNING, "User rejection failed. User ID: {0}", userId);
-                request.setAttribute("message", "Failed to reject user.");
-                request.setAttribute("messageType", "error");
-                request.setAttribute("user", user);
-            }
-
-            request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
-
-        } catch (NumberFormatException e) {
-            LOGGER.log(Level.SEVERE, "Invalid user ID format while rejecting user.", e);
-            request.setAttribute("message", "Invalid user ID format.");
-            request.setAttribute("messageType", "error");
-            request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
-
+            req.setAttribute("user", user);
+            req.setAttribute("previousStatus", prev);
+            req.setAttribute("newStatus", "REJECTED");
+            ServletUtils.forwardMessage(req, res,
+                ok ? "User rejected successfully." : "Failed to reject user.",
+                ok ? "success" : "error");
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error occurred while rejecting user.", e);
-            request.setAttribute("message", "Something went wrong while rejecting user.");
-            request.setAttribute("messageType", "error");
-            request.getRequestDispatcher("/admin/message.jsp").forward(request, response);
+            LOGGER.log(Level.SEVERE, "Error rejecting user.", e);
+            ServletUtils.forwardMessage(req, res, "Something went wrong.", "error");
         }
     }
 }
