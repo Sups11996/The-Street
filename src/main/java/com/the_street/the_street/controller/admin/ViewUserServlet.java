@@ -1,4 +1,4 @@
-package com.the_street.the_street.controller;
+package com.the_street.the_street.controller.admin;
 
 import com.the_street.the_street.dao.UserDAO;
 import com.the_street.the_street.dao.UserInterface;

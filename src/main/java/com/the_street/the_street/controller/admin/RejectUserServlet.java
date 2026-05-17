@@ -1,4 +1,4 @@
-package com.the_street.the_street.controller;
+package com.the_street.the_street.controller.admin;
 
 import com.the_street.the_street.dao.UserDAO;
 import com.the_street.the_street.dao.UserInterface;
@@ -14,10 +14,10 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@WebServlet("/delete-user")
-public class DeleteUserServlet extends HttpServlet {
+@WebServlet("/reject-user")
+public class RejectUserServlet extends HttpServlet {
 
-    private static final Logger LOGGER = Logger.getLogger(DeleteUserServlet.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(RejectUserServlet.class.getName());
     private final UserInterface userInterface = new UserDAO();
 
     @Override
@@ -31,23 +31,18 @@ public class DeleteUserServlet extends HttpServlet {
             User user = userInterface.getUserById(userId);
             if (user == null) { ServletUtils.forwardMessage(req, res, "User not found.", "error"); return; }
 
-            if ("ADMIN".equalsIgnoreCase(user.getRole())) {
-                ServletUtils.forwardMessage(req, res, "Cannot delete ADMIN users.", "error");
-                return;
-            }
-
             String prev = user.getStatus();
-            boolean ok  = userInterface.deleteUser(userId);
-            LOGGER.log(ok ? Level.INFO : Level.WARNING, "Delete user {0}: {1}", new Object[]{userId, ok});
+            boolean ok  = userInterface.rejectUser(userId);
+            LOGGER.log(ok ? Level.INFO : Level.WARNING, "Reject user {0}: {1}", new Object[]{userId, ok});
 
             req.setAttribute("user", user);
             req.setAttribute("previousStatus", prev);
-            req.setAttribute("newStatus", "DELETED");
+            req.setAttribute("newStatus", "REJECTED");
             ServletUtils.forwardMessage(req, res,
-                ok ? "User deleted successfully." : "Failed to delete user.",
-                "error");
+                ok ? "User rejected successfully." : "Failed to reject user.",
+                ok ? "success" : "error");
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error deleting user.", e);
+            LOGGER.log(Level.SEVERE, "Error rejecting user.", e);
             ServletUtils.forwardMessage(req, res, "Something went wrong.", "error");
         }
     }

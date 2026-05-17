@@ -1,4 +1,4 @@
-package com.the_street.the_street.controller;
+package com.the_street.the_street.controller.auth;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;

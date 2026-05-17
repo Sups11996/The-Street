@@ -1,4 +1,4 @@
-package com.the_street.the_street.controller;
+package com.the_street.the_street.controller.admin;
 
 import com.the_street.the_street.dao.UserDAO;
 import com.the_street.the_street.dao.UserInterface;
@@ -14,10 +14,10 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@WebServlet("/approve-user")
-public class ApproveUserServlet extends HttpServlet {
+@WebServlet("/delete-user")
+public class DeleteUserServlet extends HttpServlet {
 
-    private static final Logger LOGGER = Logger.getLogger(ApproveUserServlet.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DeleteUserServlet.class.getName());
     private final UserInterface userInterface = new UserDAO();
 
     @Override
@@ -31,18 +31,23 @@ public class ApproveUserServlet extends HttpServlet {
             User user = userInterface.getUserById(userId);
             if (user == null) { ServletUtils.forwardMessage(req, res, "User not found.", "error"); return; }
 
+            if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+                ServletUtils.forwardMessage(req, res, "Cannot delete ADMIN users.", "error");
+                return;
+            }
+
             String prev = user.getStatus();
-            boolean ok  = userInterface.approveUser(userId);
-            LOGGER.log(ok ? Level.INFO : Level.WARNING, "Approve user {0}: {1}", new Object[]{userId, ok});
+            boolean ok  = userInterface.deleteUser(userId);
+            LOGGER.log(ok ? Level.INFO : Level.WARNING, "Delete user {0}: {1}", new Object[]{userId, ok});
 
             req.setAttribute("user", user);
             req.setAttribute("previousStatus", prev);
-            req.setAttribute("newStatus", "ACTIVE");
+            req.setAttribute("newStatus", "DELETED");
             ServletUtils.forwardMessage(req, res,
-                ok ? "User approved successfully." : "Failed to approve user.",
-                ok ? "success" : "error");
+                ok ? "User deleted successfully." : "Failed to delete user.",
+                "error");
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error approving user.", e);
+            LOGGER.log(Level.SEVERE, "Error deleting user.", e);
             ServletUtils.forwardMessage(req, res, "Something went wrong.", "error");
         }
     }

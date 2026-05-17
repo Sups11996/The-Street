@@ -1,4 +1,4 @@
-package com.the_street.the_street.controller;
+package com.the_street.the_street.controller.admin;
 
 import com.the_street.the_street.dao.UserDAO;
 import com.the_street.the_street.dao.UserInterface;
@@ -14,10 +14,10 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@WebServlet("/reject-user")
-public class RejectUserServlet extends HttpServlet {
+@WebServlet("/approve-user")
+public class ApproveUserServlet extends HttpServlet {
 
-    private static final Logger LOGGER = Logger.getLogger(RejectUserServlet.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ApproveUserServlet.class.getName());
     private final UserInterface userInterface = new UserDAO();
 
     @Override
@@ -32,17 +32,17 @@ public class RejectUserServlet extends HttpServlet {
             if (user == null) { ServletUtils.forwardMessage(req, res, "User not found.", "error"); return; }
 
             String prev = user.getStatus();
-            boolean ok  = userInterface.rejectUser(userId);
-            LOGGER.log(ok ? Level.INFO : Level.WARNING, "Reject user {0}: {1}", new Object[]{userId, ok});
+            boolean ok  = userInterface.approveUser(userId);
+            LOGGER.log(ok ? Level.INFO : Level.WARNING, "Approve user {0}: {1}", new Object[]{userId, ok});
 
             req.setAttribute("user", user);
             req.setAttribute("previousStatus", prev);
-            req.setAttribute("newStatus", "REJECTED");
+            req.setAttribute("newStatus", "ACTIVE");
             ServletUtils.forwardMessage(req, res,
-                ok ? "User rejected successfully." : "Failed to reject user.",
+                ok ? "User approved successfully." : "Failed to approve user.",
                 ok ? "success" : "error");
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error rejecting user.", e);
+            LOGGER.log(Level.SEVERE, "Error approving user.", e);
             ServletUtils.forwardMessage(req, res, "Something went wrong.", "error");
         }
     }
