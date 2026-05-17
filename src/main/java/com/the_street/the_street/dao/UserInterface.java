@@ -31,4 +31,7 @@ public interface UserInterface {
     int countUsers();
     int countPendingUsers();
     int countActiveUsers();
+
+    // Profile password update
+    boolean updatePassword(int userId, String hashedPassword);
 }

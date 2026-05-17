@@ -26,6 +26,29 @@
             </svg>
             Manage Users
         </a>
+        <a class="<%= "donations".equals(activePage) ? "active" : "" %>"
+           href="<%= request.getContextPath() %>/admin/manage-donations.jsp">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            Manage Donations
+        </a>
+        <a class="<%= "requests".equals(activePage) ? "active" : "" %>"
+           href="<%= request.getContextPath() %>/admin/manage-requests.jsp">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 11l3 3L22 4"/>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+            Manage Requests
+        </a>
+        <a class="<%= "profile".equals(activePage) ? "active" : "" %>"
+           href="<%= request.getContextPath() %>/admin-profile">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+            Profile Settings
+        </a>
     </nav>
     <div style="margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,0.12);">
         <a href="<%= request.getContextPath() %>/logout" style="color:rgba(255,255,255,0.65);">

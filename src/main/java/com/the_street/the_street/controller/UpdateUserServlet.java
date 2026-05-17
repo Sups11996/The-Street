@@ -73,6 +73,7 @@ public class UpdateUserServlet extends HttpServlet {
             user.setPassword((newPw != null && !newPw.trim().isEmpty())
                 ? PasswordUtils.hashPassword(newPw.trim())
                 : existing.getPassword());
+            user.setProfileImage(existing.getProfileImage());
 
             boolean ok = userInterface.updateUser(user);
             LOGGER.log(ok ? Level.INFO : Level.WARNING, "Update user {0}: {1}", new Object[]{userId, ok});

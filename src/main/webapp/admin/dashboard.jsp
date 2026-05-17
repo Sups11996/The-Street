@@ -181,9 +181,10 @@
             color: #6B7280;
             margin: 0;
             line-height: 1.5;
+            min-height: 38px;
         }
 
-        /* Input + button row inside action cards */
+        /* Action card input+button rows */
         .action-card form {
             display: flex;
             gap: 8px;
@@ -219,7 +220,55 @@
             flex-shrink: 0;
         }
 
-        /* Link button inside action card */
+        /* Inline action row (non-form) */
+        .action-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .action-row input {
+            flex: 1;
+            padding: 9px 12px;
+            margin: 0;
+            border: 1.5px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1E1E1E;
+            background: #F9FAFB;
+            transition: border-color 0.2s;
+            min-width: 0;
+        }
+
+        .action-row input:focus {
+            outline: none;
+            border-color: #1F7A5C;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(31,122,92,0.10);
+        }
+
+        .action-row button {
+            padding: 9px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
+            border: none;
+            cursor: pointer;
+            color: #E8F5F0;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+
+        .action-row button:hover { opacity: 0.85; transform: translateY(-1px); }
+        .action-row button:active { transform: translateY(0); }
+
+        .btn-blue   { background: #2563EB; }
+        .btn-green  { background: #059669; }
+        .btn-amber  { background: #D97706; }
+        .btn-red    { background: #DC2626; }
+        .btn-rose   { background: #E11D48; }
+
         .action-card .action-link {
             display: inline-flex;
             align-items: center;
@@ -231,11 +280,15 @@
             text-decoration: none;
             font-size: 14px;
             font-weight: 600;
-            transition: background 0.15s;
+            transition: background 0.15s, transform 0.1s;
             width: fit-content;
         }
 
-        .action-link:hover { background: #145A42; }
+        .action-link:hover        { background: #145A42; transform: translateY(-1px); }
+        .action-link.amber        { background: #D97706; }
+        .action-link.amber:hover  { background: #B45309; transform: translateY(-1px); }
+        .action-link.teal         { background: #0891B2; }
+        .action-link.teal:hover   { background: #0E7490; transform: translateY(-1px); }
 
         .action-link svg {
             width: 15px;
@@ -377,17 +430,43 @@
             <div class="action-card border-green">
                 <div class="action-card-header">
                     <div class="action-card-icon green">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                            <circle cx="9" cy="7" r="4"/>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                        </svg>
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     </div>
                     <h3>Manage Users</h3>
                 </div>
                 <p>View, edit and manage all registered users.</p>
                 <a class="action-link" href="<%= request.getContextPath() %>/view-users">
                     View All Users
+                    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+            </div>
+
+            <!-- Manage Donations -->
+            <div class="action-card border-green">
+                <div class="action-card-header">
+                    <div class="action-card-icon green">
+                        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    </div>
+                    <h3>Manage Donations</h3>
+                </div>
+                <p>Monitor and remove donation posts.</p>
+                <a class="action-link" href="<%= request.getContextPath() %>/admin/manage-donations.jsp">
+                    View Donations
+                    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+            </div>
+
+            <!-- Manage Requests -->
+            <div class="action-card border-amber">
+                <div class="action-card-header">
+                    <div class="action-card-icon amber">
+                        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    </div>
+                    <h3>Manage Requests</h3>
+                </div>
+                <p>Monitor and remove receiver requests.</p>
+                <a class="action-link amber" href="<%= request.getContextPath() %>/admin/manage-requests.jsp">
+                    View Requests
                     <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
                 </a>
             </div>
@@ -406,7 +485,7 @@
                     <h3>Create User</h3>
                 </div>
                 <p>Add a new user account with any role and status.</p>
-                <a class="action-link" href="<%= request.getContextPath() %>/admin-create-user" style="background:#0891B2;">
+                <a class="action-link teal" href="<%= request.getContextPath() %>/admin-create-user">
                     Create New User
                     <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
                 </a>
@@ -420,9 +499,9 @@
                     <h3>Search User</h3>
                 </div>
                 <p>Find a user by their ID.</p>
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <input type="number" id="searchId" placeholder="Enter User ID" min="1" style="flex:1;padding:9px 12px;margin:0;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;color:#1E1E1E;background:#F9FAFB;">
-                    <button onclick="doSearch()" style="padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600;background:#2563EB;color:#E8F5F0;border:none;cursor:pointer;">Search</button>
+                <div class="action-row">
+                    <input type="number" id="searchId" placeholder="Enter User ID" min="1">
+                    <button onclick="doSearch()" class="btn-blue">Search</button>
                 </div>
             </div>
 
@@ -435,9 +514,9 @@
                     <h3>Approve User</h3>
                 </div>
                 <p>Approve a pending user account.</p>
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <input type="number" id="approveId" placeholder="User ID" min="1" style="flex:1;padding:9px 12px;margin:0;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;color:#1E1E1E;background:#F9FAFB;">
-                    <button onclick="doAction('approve','approveId')" style="padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600;background:#059669;color:#E8F5F0;border:none;cursor:pointer;">Approve</button>
+                <div class="action-row">
+                    <input type="number" id="approveId" placeholder="User ID" min="1">
+                    <button onclick="doAction('approve','approveId')" class="btn-green">Approve</button>
                 </div>
             </div>
 
@@ -450,9 +529,9 @@
                     <h3>Reject User</h3>
                 </div>
                 <p>Reject a user's registration request.</p>
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <input type="number" id="rejectId" placeholder="User ID" min="1" style="flex:1;padding:9px 12px;margin:0;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;color:#1E1E1E;background:#F9FAFB;">
-                    <button onclick="doAction('reject','rejectId')" style="padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600;background:#D97706;color:#E8F5F0;border:none;cursor:pointer;">Reject</button>
+                <div class="action-row">
+                    <input type="number" id="rejectId" placeholder="User ID" min="1">
+                    <button onclick="doAction('reject','rejectId')" class="btn-amber">Reject</button>
                 </div>
             </div>
 
@@ -465,9 +544,9 @@
                     <h3>Block User</h3>
                 </div>
                 <p>Block a user from accessing the platform.</p>
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <input type="number" id="blockId" placeholder="User ID" min="1" style="flex:1;padding:9px 12px;margin:0;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;color:#1E1E1E;background:#F9FAFB;">
-                    <button onclick="doAction('block','blockId')" style="padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600;background:#DC2626;color:#E8F5F0;border:none;cursor:pointer;">Block</button>
+                <div class="action-row">
+                    <input type="number" id="blockId" placeholder="User ID" min="1">
+                    <button onclick="doAction('block','blockId')" class="btn-red">Block</button>
                 </div>
             </div>
 
@@ -480,9 +559,9 @@
                     <h3>Delete User</h3>
                 </div>
                 <p>Permanently remove a user from the system.</p>
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <input type="number" id="deleteId" placeholder="User ID" min="1" style="flex:1;padding:9px 12px;margin:0;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;color:#1E1E1E;background:#F9FAFB;">
-                    <button onclick="doAction('delete','deleteId')" style="padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600;background:#E11D48;color:#E8F5F0;border:none;cursor:pointer;">Delete</button>
+                <div class="action-row">
+                    <input type="number" id="deleteId" placeholder="User ID" min="1">
+                    <button onclick="doAction('delete','deleteId')" class="btn-rose">Delete</button>
                 </div>
             </div>
 
