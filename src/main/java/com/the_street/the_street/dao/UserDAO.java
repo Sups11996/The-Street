@@ -127,7 +127,7 @@ public class UserDAO implements UserInterface {
 
     @Override
     public boolean updateUser(User user) {
-        String sql = "UPDATE users SET full_name = ?, email = ?, phone = ?, role = ?, address = ?, status = ? WHERE user_id = ?";
+        String sql = "UPDATE users SET full_name = ?, email = ?, phone = ?, role = ?, address = ?, status = ?, password = ?, profile_image = ? WHERE user_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -138,7 +138,9 @@ public class UserDAO implements UserInterface {
             ps.setString(4, user.getRole());
             ps.setString(5, user.getAddress());
             ps.setString(6, user.getStatus());
-            ps.setInt(7, user.getUserId());
+            ps.setString(7, user.getPassword());
+            ps.setString(8, user.getProfileImage());
+            ps.setInt(9, user.getUserId());
 
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
@@ -224,6 +226,27 @@ public class UserDAO implements UserInterface {
     }
 
     @Override
+    public int countActiveUsers() {
+        String sql = "SELECT COUNT(*) FROM users WHERE status = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, "ACTIVE");
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error counting active users.", e);
+        }
+
+        return 0;
+    }
+
+    @Override
     public boolean approveUser(int userId) {
         return updateUserStatus(userId, "ACTIVE");
     }
@@ -276,6 +299,24 @@ public class UserDAO implements UserInterface {
         }
 
         return 0;
+    }
+
+    @Override
+    public boolean updatePassword(int userId, String hashedPassword) {
+        String sql = "UPDATE users SET password = ? WHERE user_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, hashedPassword);
+            ps.setInt(2, userId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error updating password for userId=" + userId, e);
+            return false;
+        }
     }
 
     // Helper method to avoid duplication

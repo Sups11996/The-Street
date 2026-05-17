@@ -30,4 +30,8 @@ public interface UserInterface {
     // Dashboard count cards
     int countUsers();
     int countPendingUsers();
+    int countActiveUsers();
+
+    // Profile password update
+    boolean updatePassword(int userId, String hashedPassword);
 }
