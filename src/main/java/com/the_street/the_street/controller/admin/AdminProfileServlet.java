@@ -63,6 +63,8 @@ public class AdminProfileServlet extends HttpServlet {
             handleUpdateProfile(req, res);
         } else if ("updatePassword".equals(action)) {
             handleUpdatePassword(req, res);
+        } else if ("removePhoto".equals(action)) {
+            handleRemovePhoto(req, res);
         } else {
             res.sendRedirect(req.getContextPath() + "/admin-profile");
         }
@@ -218,6 +220,41 @@ public class AdminProfileServlet extends HttpServlet {
             session.setAttribute("pwSuccess", "Password updated successfully.");
         } else {
             session.setAttribute("pwError", "Failed to update password. Please try again.");
+        }
+
+        res.sendRedirect(req.getContextPath() + "/admin-profile");
+    }
+
+    // ── Remove profile photo ──────────────────────────────────────────────────
+
+    private void handleRemovePhoto(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+
+        HttpSession session = req.getSession(false);
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) {
+            res.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+
+        User existing = userDAO.getUserById(userId);
+        if (existing == null) {
+            session.setAttribute("profileError", "User not found.");
+            res.sendRedirect(req.getContextPath() + "/admin-profile");
+            return;
+        }
+
+        existing.setProfileImage("");
+        boolean ok = userDAO.updateUser(existing);
+        LOGGER.log(ok ? Level.INFO : Level.WARNING,
+                "Admin photo removal for userId={0}: {1}", new Object[]{userId, ok});
+
+        if (ok) {
+            session.setAttribute("fullName", existing.getFullName());
+            session.setAttribute("loggedInUser", existing);
+            session.setAttribute("profileSuccess", "Profile picture removed.");
+        } else {
+            session.setAttribute("profileError", "Failed to remove profile picture.");
         }
 
         res.sendRedirect(req.getContextPath() + "/admin-profile");
