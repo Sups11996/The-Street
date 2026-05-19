@@ -159,6 +159,21 @@
 
         .btn-upload-photo:hover { background: #145A42; }
 
+        .btn-remove-photo {
+            width: 100%;
+            padding: 9px;
+            background: none;
+            color: #DC2626;
+            border: 1.5px solid #DC2626;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .btn-remove-photo:hover { background: #FEE2E2; }
+
         /* ── Right: form cards ── */
         .form-card {
             background: #FFFFFF;
@@ -420,6 +435,19 @@
 
                     <button type="submit" class="btn-upload-photo">Save Photo</button>
                 </form>
+
+                <% if (profileUser.getProfileImage() != null && !profileUser.getProfileImage().isEmpty()) { %>
+                <form action="<%= request.getContextPath() %>/admin-profile" method="post" style="width:100%;margin-top:8px;">
+                    <input type="hidden" name="action" value="removePhoto">
+                    <input type="hidden" name="fullName" value="<%= profileUser.getFullName() %>">
+                    <input type="hidden" name="phone"    value="<%= profileUser.getPhone() != null ? profileUser.getPhone() : "" %>">
+                    <input type="hidden" name="address"  value="<%= profileUser.getAddress() != null ? profileUser.getAddress() : "" %>">
+                    <button type="submit" class="btn-remove-photo"
+                            onclick="return confirm('Remove your profile picture?')">
+                        Remove Photo
+                    </button>
+                </form>
+                <% } %>
             </div>
 
             <!-- ── Right: forms ── -->
