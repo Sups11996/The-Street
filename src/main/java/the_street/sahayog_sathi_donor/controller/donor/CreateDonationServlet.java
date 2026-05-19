@@ -1,4 +1,4 @@
-package the_street.sahayog_sathi_donor.controller;
+package the_street.sahayog_sathi_donor.controller.donor;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
